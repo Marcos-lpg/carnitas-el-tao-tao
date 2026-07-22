@@ -107,6 +107,16 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "CarnitasTaoTao.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/CarnitasTaoTao.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CarnitasTaoTao.Core.dll": {}
+        }
       }
     }
   },
@@ -473,10 +483,16 @@
         "swashbuckle.aspnetcore.swaggerui.6.6.2.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
+    },
+    "CarnitasTaoTao.Core/1.0.0": {
+      "type": "project",
+      "path": "../CarnitasTaoTao.Core/CarnitasTaoTao.Core.csproj",
+      "msbuildProject": "../CarnitasTaoTao.Core/CarnitasTaoTao.Core.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "CarnitasTaoTao.Core >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 8.0.29",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
@@ -505,7 +521,11 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\Marcos\\Downloads\\carnitas-el-tao-tao\\backend\\CarnitasTaoTao.Core\\CarnitasTaoTao.Core.csproj": {
+              "projectPath": "C:\\Users\\Marcos\\Downloads\\carnitas-el-tao-tao\\backend\\CarnitasTaoTao.Core\\CarnitasTaoTao.Core.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
