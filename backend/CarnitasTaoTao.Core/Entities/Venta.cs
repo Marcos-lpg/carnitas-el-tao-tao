@@ -7,4 +7,7 @@ public class Venta
     public decimal Total { get; set; }
     public string MetodoPago { get; set; } = "Efectivo"; // Efectivo, Transferencia, Tarjeta
     public string? Observaciones { get; set; }
+
+    // Relación: Una venta contiene varios productos (detalles)
+    public List<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
 }

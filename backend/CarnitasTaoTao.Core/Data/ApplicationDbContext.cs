@@ -11,6 +11,7 @@ namespace CarnitasTaoTao.Core.Data
 
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
+        public DbSet<DetalleVenta> DetallesVentas { get; set; } // <--- Nueva tabla agregada
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
@@ -29,6 +30,15 @@ namespace CarnitasTaoTao.Core.Data
 
             modelBuilder.Entity<Gasto>()
                 .Property(g => g.Monto)
+                .HasPrecision(18, 2);
+
+            // Precisiones agregadas para el Detalle de Venta
+            modelBuilder.Entity<DetalleVenta>()
+                .Property(d => d.PrecioUnitario)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleVenta>()
+                .Property(d => d.Subtotal)
                 .HasPrecision(18, 2);
         }
     }

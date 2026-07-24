@@ -3,8 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Agregar soporte para Controladores y Swagger
-builder.Services.AddControllers();
+// 1. Agregar soporte para Controladores y Swagger (con solución a ciclos JSON)
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -24,7 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 4. Mapear los Controllers (ProductosController, etc.)
+// 4. Mapear los Controllers (ProductosController, VentasController, etc.)
 app.MapControllers();
 
 app.Run();
