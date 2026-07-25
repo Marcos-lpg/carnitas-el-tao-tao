@@ -15,13 +15,12 @@ namespace CarnitasTaoTao.Api.Controllers
             _context = context;
         }
 
-        // 1. Consultar estado actual (Saber si hay caja abierta hoy)
+       
+// 1. Consultar estado actual (Saber si hay caja abierta hoy)
         [HttpGet("estado-actual")]
         public async Task<IActionResult> ObtenerEstadoActual()
         {
             var cajaAbierta = await _context.CajaTurnos
-                .Include(c => c.Ventas)
-                .Include(c => c.Gastos)
                 .FirstOrDefaultAsync(c => c.EstaAbierta);
 
             if (cajaAbierta == null)
@@ -29,7 +28,22 @@ namespace CarnitasTaoTao.Api.Controllers
                 return Ok(new { abierta = false, mensaje = "No hay ninguna caja abierta actualmente." });
             }
 
-            return Ok(new { abierta = true, caja = cajaAbierta });
+            // Calculamos los totales directamente filtrando por el ID de la caja activa 
+            // asegurando que si es un turno nuevo sin movimientos, sume 0.
+            var totalVentas = await _context.Ventas
+                .Where(v => v.CajaTurnoId == cajaAbierta.Id)
+                .SumAsync(v => (decimal?)v.Total) ?? 0;
+
+            var totalGastos = await _context.Insumos // O Gastos, dependiendo de tu modelo exacto
+                .Where(g => g.CajaTurnoId == cajaAbierta.Id)
+                .SumAsync(g => (decimal?)g.Monto) ?? 0;
+
+            return Ok(new { 
+                abierta = true, 
+                caja = cajaAbierta,
+                totalVentas = totalVentas,
+                totalGastos = totalGastos
+            });
         }
 
         // 2. Abrir Caja

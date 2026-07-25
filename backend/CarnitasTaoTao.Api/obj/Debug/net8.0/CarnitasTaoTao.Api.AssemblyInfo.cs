@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CarnitasTaoTao.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3d8cb4803a8f0792d0a7925191f8ed90abbc4eaf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a0b3c4c43883e7c95787f2f285dc313af43c522a")]
 [assembly: System.Reflection.AssemblyProductAttribute("CarnitasTaoTao.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CarnitasTaoTao.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

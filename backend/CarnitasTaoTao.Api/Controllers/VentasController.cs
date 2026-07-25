@@ -17,11 +17,22 @@ namespace CarnitasTaoTao.Api.Controllers
             _context = context;
         }
 
-        // GET: api/ventas
+       // GET: api/ventas
         [HttpGet]
         public async Task<IActionResult> GetVentas()
         {
+            // 1. Buscar la caja que esté abierta actualmente
+            var cajaAbierta = await _context.CajaTurnos.FirstOrDefaultAsync(c => c.EstaAbierta);
+
+            // 2. Si no hay caja abierta, retornamos una lista vacía para que todo aparezca en ceros
+            if (cajaAbierta == null)
+            {
+                return Ok(new List<VentaDto>());
+            }
+
+            // 3. Traer únicamente las ventas que pertenecen a la caja activa del turno actual
             var ventas = await _context.Ventas
+                .Where(v => v.CajaTurnoId == cajaAbierta.Id)
                 .Include(v => v.Detalles)
                 .OrderByDescending(v => v.Fecha)
                 .Select(v => new VentaDto
