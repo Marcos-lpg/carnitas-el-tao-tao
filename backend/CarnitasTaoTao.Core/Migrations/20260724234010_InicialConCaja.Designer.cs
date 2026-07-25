@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarnitasTaoTao.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260724144145_AgregarDetalleVenta")]
-    partial class AgregarDetalleVenta
+    [Migration("20260724234010_InicialConCaja")]
+    partial class InicialConCaja
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,42 @@ namespace CarnitasTaoTao.Core.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("CarnitasTaoTao.Core.Entities.CajaTurno", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("EfectivoEnCaja")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("EstaAbierta")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("FechaApertura")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaCierre")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("FondoInicial")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalGastos")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalVentas")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CajaTurnos");
+                });
 
             modelBuilder.Entity("CarnitasTaoTao.Core.Entities.DetalleVenta", b =>
                 {
@@ -60,6 +96,9 @@ namespace CarnitasTaoTao.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("CajaTurnoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Categoria")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -77,7 +116,35 @@ namespace CarnitasTaoTao.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CajaTurnoId");
+
                     b.ToTable("Gastos");
+                });
+
+            modelBuilder.Entity("CarnitasTaoTao.Core.Entities.Insumo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Fecha");
+
+                    b.Property<decimal>("Monto")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Monto");
+
+                    b.Property<string>("TipoInsumo")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("TipoInsumo");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("insumos");
                 });
 
             modelBuilder.Entity("CarnitasTaoTao.Core.Entities.Producto", b =>
@@ -100,6 +167,9 @@ namespace CarnitasTaoTao.Core.Migrations
                     b.Property<decimal>("Precio")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -138,14 +208,25 @@ namespace CarnitasTaoTao.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("CajaTurnoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DescripcionPedido")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DireccionEnvio")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EstadoPago")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("MetodoPago")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Observaciones")
+                    b.Property<string>("NombreCliente")
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("Total")
@@ -153,6 +234,8 @@ namespace CarnitasTaoTao.Core.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CajaTurnoId");
 
                     b.ToTable("Ventas");
                 });
@@ -174,6 +257,35 @@ namespace CarnitasTaoTao.Core.Migrations
                     b.Navigation("Producto");
 
                     b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("CarnitasTaoTao.Core.Entities.Gasto", b =>
+                {
+                    b.HasOne("CarnitasTaoTao.Core.Entities.CajaTurno", "CajaTurno")
+                        .WithMany("Gastos")
+                        .HasForeignKey("CajaTurnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CajaTurno");
+                });
+
+            modelBuilder.Entity("CarnitasTaoTao.Core.Entities.Venta", b =>
+                {
+                    b.HasOne("CarnitasTaoTao.Core.Entities.CajaTurno", "CajaTurno")
+                        .WithMany("Ventas")
+                        .HasForeignKey("CajaTurnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CajaTurno");
+                });
+
+            modelBuilder.Entity("CarnitasTaoTao.Core.Entities.CajaTurno", b =>
+                {
+                    b.Navigation("Gastos");
+
+                    b.Navigation("Ventas");
                 });
 
             modelBuilder.Entity("CarnitasTaoTao.Core.Entities.Venta", b =>

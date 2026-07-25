@@ -13,6 +13,17 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// NUEVO: Configuración de CORS para permitir peticiones desde el frontend (puertos 5173 y 5174)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // 2. Configuración de Entity Framework Core con MySQL (Pomelo)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -28,6 +39,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// NUEVO: Activar la política de CORS (¡Debe ir antes de MapControllers!)
+app.UseCors("AllowFrontend");
 
 // 4. Mapear los Controllers (ProductosController, VentasController, etc.)
 app.MapControllers();

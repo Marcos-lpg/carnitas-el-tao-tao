@@ -7,4 +7,6 @@ public class Gasto
     public decimal Monto { get; set; }
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
     public string Categoria { get; set; } = string.Empty; // Insumos, Servicios, Mantenimiento
+    public int CajaTurnoId { get; set; }
+public CajaTurno? CajaTurno { get; set; }
 }

@@ -11,9 +11,11 @@ namespace CarnitasTaoTao.Core.Data
 
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
-        public DbSet<DetalleVenta> DetallesVentas { get; set; } // <--- Nueva tabla agregada
+        public DbSet<DetalleVenta> DetallesVentas { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Insumo> Insumos { get; set; }
+        public DbSet<CajaTurno> CajaTurnos { get; set; } // <--- Agregado
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,13 +34,33 @@ namespace CarnitasTaoTao.Core.Data
                 .Property(g => g.Monto)
                 .HasPrecision(18, 2);
 
-            // Precisiones agregadas para el Detalle de Venta
             modelBuilder.Entity<DetalleVenta>()
                 .Property(d => d.PrecioUnitario)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<DetalleVenta>()
                 .Property(d => d.Subtotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Insumo>()
+                .Property(i => i.Monto)
+                .HasPrecision(18, 2);
+
+            // Precisión para los decimales de CajaTurno
+            modelBuilder.Entity<CajaTurno>()
+                .Property(c => c.FondoInicial)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CajaTurno>()
+                .Property(c => c.TotalVentas)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CajaTurno>()
+                .Property(c => c.TotalGastos)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CajaTurno>()
+                .Property(c => c.EfectivoEnCaja)
                 .HasPrecision(18, 2);
         }
     }
