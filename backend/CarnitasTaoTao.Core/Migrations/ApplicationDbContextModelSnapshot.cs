@@ -125,6 +125,10 @@ namespace CarnitasTaoTao.Core.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    b.Property<int>("CajaTurnoId")
+                        .HasColumnType("int")
+                        .HasColumnName("CajaTurnoId");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("Fecha");
@@ -182,6 +186,13 @@ namespace CarnitasTaoTao.Core.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("Correo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("EsCorreoValidado")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("NombreUsuario")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -192,6 +203,9 @@ namespace CarnitasTaoTao.Core.Migrations
 
                     b.Property<string>("Rol")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TokenVerificacion")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");

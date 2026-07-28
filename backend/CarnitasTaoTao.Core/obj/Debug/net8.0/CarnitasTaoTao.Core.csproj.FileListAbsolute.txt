@@ -1,0 +1,13 @@
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\bin\Debug\net8.0\CarnitasTaoTao.Core.deps.json
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\bin\Debug\net8.0\CarnitasTaoTao.Core.dll
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\bin\Debug\net8.0\CarnitasTaoTao.Core.pdb
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.csproj.AssemblyReference.cache
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.AssemblyInfoInputs.cache
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.AssemblyInfo.cs
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.csproj.CoreCompileInputs.cache
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.sourcelink.json
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.dll
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\refint\CarnitasTaoTao.Core.dll
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\CarnitasTaoTao.Core.pdb
+C:\Users\Marcos\Downloads\carnitas-el-tao-tao\backend\CarnitasTaoTao.Core\obj\Debug\net8.0\ref\CarnitasTaoTao.Core.dll

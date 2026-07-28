@@ -19,5 +19,9 @@ namespace CarnitasTaoTao.Core.Entities
 
         [Column("Monto")]
         public decimal Monto { get; set; }
+
+        // Agrega esta propiedad para vincular el gasto a la caja activa
+        [Column("CajaTurnoId")]
+        public int CajaTurnoId { get; set; }
     }
 }
