@@ -412,4 +412,4 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
 
     </div>
   );
-}
+} 
