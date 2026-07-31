@@ -7,13 +7,13 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
   const [precio, setPrecio] = useState('');
   const [cliente, setCliente] = useState('');
   const [direccion, setDireccion] = useState('');
+  const [pagaCon, setPagaCon] = useState('');
   const [carrito, setCarrito] = useState([]);
   const [tipoTaco, setTipoTaco] = useState('normal'); 
   const [editandoIndex, setEditandoIndex] = useState(null); 
   const [mensaje, setMensaje] = useState('');
   const [cajaTurnoId, setCajaTurnoId] = useState('1');
 
-  // Intentamos obtener el ID real de la caja abierta de forma transparente en segundo plano
   useEffect(() => {
     const verificarTurno = async () => {
       try {
@@ -40,7 +40,48 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
   ];
 
   const agregarAlCarrito = (prod) => {
-    setCarrito([...carrito, { descripcion: prod.nombre, precio: prod.precioBase }]);
+    const indexExistente = carrito.findIndex(item => item.descripcion === prod.nombre);
+    
+    if (indexExistente !== -1) {
+      const nuevoCarrito = [...carrito];
+      const itemActual = nuevoCarrito[indexExistente];
+      const nuevaCantidad = itemActual.cantidad + 1;
+      const precioUnitario = itemActual.precioUnitario || (itemActual.precio / itemActual.cantidad);
+      
+      nuevoCarrito[indexExistente] = {
+        ...itemActual,
+        cantidad: nuevaCantidad,
+        precioUnitario: precioUnitario,
+        precio: precioUnitario * nuevaCantidad
+      };
+      setCarrito(nuevoCarrito);
+    } else {
+      setCarrito([...carrito, { 
+        descripcion: prod.nombre, 
+        precioUnitario: prod.precioBase, 
+        precio: prod.precioBase, 
+        cantidad: 1 
+      }]);
+    }
+  };
+
+  const cambiarCantidad = (index, delta) => {
+    const nuevoCarrito = [...carrito];
+    const item = nuevoCarrito[index];
+    const nuevaCantidad = item.cantidad + delta;
+
+    if (nuevaCantidad <= 0) {
+      eliminarDelCarrito(index);
+    } else {
+      const unitario = item.precioUnitario || (item.precio / item.cantidad);
+      nuevoCarrito[index] = {
+        ...item,
+        cantidad: nuevaCantidad,
+        precioUnitario: unitario,
+        precio: unitario * nuevaCantidad
+      };
+      setCarrito(nuevoCarrito);
+    }
   };
 
   const guardarPersonalizado = (e) => {
@@ -50,11 +91,18 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
 
     if (editandoIndex !== null) {
       const nuevoCarrito = [...carrito];
-      nuevoCarrito[editandoIndex] = { descripcion, precio: montoNum };
+      const itemActual = nuevoCarrito[editandoIndex];
+      const cant = itemActual.cantidad || 1;
+      nuevoCarrito[editandoIndex] = { 
+        descripcion, 
+        precioUnitario: montoNum, 
+        precio: montoNum * cant, 
+        cantidad: cant 
+      };
       setCarrito(nuevoCarrito);
       setEditandoIndex(null);
     } else {
-      setCarrito([...carrito, { descripcion, precio: montoNum }]);
+      setCarrito([...carrito, { descripcion, precioUnitario: montoNum, precio: montoNum, cantidad: 1 }]);
     }
 
     setDescripcion('');
@@ -73,19 +121,32 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
 
   const iniciarEdicion = (index) => {
     setDescripcion(carrito[index].descripcion);
-    setPrecio(carrito[index].precio);
+    setPrecio(carrito[index].precioUnitario || (carrito[index].precio / carrito[index].cantidad));
     setEditandoIndex(index);
   };
 
   const totalVenta = carrito.reduce((acc, item) => acc + item.precio, 0);
+  
+  // Cálculo dinámico del cambio
+  const montoPagado = parseFloat(pagaCon) || 0;
+  const cambio = montoPagado >= totalVenta ? montoPagado - totalVenta : 0;
 
   const finalizarVenta = async () => {
     if (carrito.length === 0) return;
+    if (montoPagado < totalVenta) {
+      setMensaje('❌ El monto con el que paga el cliente es menor al total.');
+      return;
+    }
 
-    // Aseguramos un ID válido por defecto (1 o el último detectado) para que el backend procese sin estorbar en pantalla
     const idActual = parseInt(cajaTurnoId) || 1;
-
-    const descripcionCompleta = carrito.map(i => `${i.descripcion} ($${i.precio})`).join(' + ');
+    
+    // Limpiamos los emojis del texto que se va a guardar en la BD y exportar a Excel
+    const descripcionCompleta = carrito
+      .map(i => {
+        const nombreLimpio = i.descripcion.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
+        return `${i.cantidad}x ${nombreLimpio} ($${i.precio})`;
+      })
+      .join(' + ');
     
     const nuevaVenta = {
       CajaTurnoId: idActual,
@@ -115,6 +176,7 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
       setCarrito([]);
       setCliente('');
       setDireccion('');
+      setPagaCon('');
       setEditandoIndex(null);
 
       if (onVentaRegistrada) {
@@ -244,26 +306,34 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fff' }}>Orden Actual</h3>
             </div>
             <span style={{ backgroundColor: '#0f172a', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', color: '#fbbf24', border: '1px solid #475569' }}>
-              {carrito.length} Pedidos
+              {carrito.length} Conceptos
             </span>
           </div>
 
           {/* Lista de Carrito */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '220px', overflowY: 'auto', paddingRight: '4px' }}>
             {carrito.length === 0 ? (
-              <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', padding: '30px 0', margin: 0 }}>El carrito está vacío</p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', padding: '25px 0', margin: 0 }}>El carrito está vacío</p>
             ) : (
               carrito.map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0f172a', padding: '12px 14px', borderRadius: '12px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxWidth: '170px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.descripcion}</span>
-                    <span style={{ fontSize: '12px', color: '#34d399', fontWeight: '700' }}>${item.precio.toFixed(2)}</span>
+                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0f172a', padding: '12px 14px', borderRadius: '12px', border: '1px solid #334155', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.descripcion}</span>
+                    <span style={{ fontSize: '13px', color: '#34d399', fontWeight: '800' }}>${item.precio.toFixed(2)}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                    <button onClick={() => iniciarEdicion(index)} title="Editar" style={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  
+                  {/* Controles de cantidad (- y +) */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '2px 6px' }}>
+                      <button onClick={() => cambiarCantidad(index, -1)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', padding: '0 4px' }}>-</button>
+                      <span style={{ fontSize: '12px', fontWeight: '700', color: '#fff', padding: '0 6px' }}>{item.cantidad}</span>
+                      <button onClick={() => cambiarCantidad(index, 1)} style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', padding: '0 4px' }}>+</button>
+                    </div>
+
+                    <button onClick={() => iniciarEdicion(index)} title="Editar" style={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px', width: '30px', height: '30px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       ✏️
                     </button>
-                    <button onClick={() => eliminarDelCarrito(index)} title="Eliminar" style={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button onClick={() => eliminarDelCarrito(index)} title="Eliminar" style={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px', width: '30px', height: '30px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       🗑️
                     </button>
                   </div>
@@ -273,33 +343,57 @@ export function PuntoDeVenta({ onVentaRegistrada }) {
           </div>
 
           {/* Datos del Cliente y Envío */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', borderTop: '1px solid #334155', paddingTop: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px solid #334155', paddingTop: '15px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nombre del Cliente:</label>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nombre del Cliente:</label>
               <input 
                 type="text" 
                 value={cliente} 
                 onChange={(e) => setCliente(e.target.value)} 
                 placeholder="Nombre del Cliente (Opcional)" 
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', outline: 'none', boxSizing: 'border-box', fontSize: '13px', fontWeight: '600' }}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', outline: 'none', boxSizing: 'border-box', fontSize: '13px', fontWeight: '600' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '11px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dirección / Entrega:</label>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dirección / Entrega:</label>
               <input 
                 type="text" 
                 value={direccion} 
                 onChange={(e) => setDireccion(e.target.value)} 
                 placeholder="Dirección / Entrega (Local o Envío)" 
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', outline: 'none', boxSizing: 'border-box', fontSize: '13px', fontWeight: '600' }}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', outline: 'none', boxSizing: 'border-box', fontSize: '13px', fontWeight: '600' }}
               />
             </div>
 
             {/* Total */}
-            <div style={{ backgroundColor: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
-              <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '600' }}>Total a Pagar:</span>
-              <span style={{ fontSize: '22px', fontWeight: '900', color: '#34d399' }}>${totalVenta.toFixed(2)}</span>
+            <div style={{ backgroundColor: '#0f172a', padding: '12px 14px', borderRadius: '12px', border: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '600' }}>Total a Pagar:</span>
+              <span style={{ fontSize: '20px', fontWeight: '900', color: '#34d399' }}>${totalVenta.toFixed(2)}</span>
+            </div>
+
+            {/* Paga Con y Cambio (Nuevo) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Paga con ($):</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  value={pagaCon} 
+                  onChange={(e) => setPagaCon(e.target.value)} 
+                  placeholder="Ej. 100, 500..." 
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #475569', backgroundColor: '#0f172a', color: 'white', outline: 'none', boxSizing: 'border-box', fontSize: '13px', fontWeight: '700' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '11px', fontWeight: '700', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Su Cambio:</label>
+                <div style={{ backgroundColor: '#0f172a', border: '1px solid #f59e0b/40', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', height: '39px', boxSizing: 'border-box' }}>
+                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#fbbf24' }}>
+                    ${cambio.toFixed(2)}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Botón de Cobro Final */}
